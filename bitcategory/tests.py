@@ -57,3 +57,24 @@ class ModelTest(TestCase):
         self.assertEqual(cat22.ancestors[0], cat2)  # the last one has to be the root
         self.assertEqual(cat22.ancestors[1], cat22)  # the last one has to be the root
         self.assertEqual(cat22.root, cat2)  # the last one has to be the root
+        # spaces in ids line
+        cat23 = Category(parent=cat2, level=2, name="cat23")
+        self.assertEqual(cat23.get_free_id(), 0b00010000110000000000000000000000)
+        cat23.save()
+        cat22.delete()
+        self.assertFalse(Category.objects.filter(id=0b00010000100000000000000000000000).exists())
+
+        cat22 = Category(parent=cat2, level=2, name="cat22")
+        self.assertEqual(cat22.get_free_id(), 0b00010000100000000000000000000000)
+        cat22.save()
+        # counts
+        cat221 = Category(parent=cat22, level=3, name="cat221")
+        self.assertEqual(cat221.get_free_id(), 0b00010000100000100000000000000000)
+        cat221.save()
+        self.assertEqual(cat22.descendants.count(), 2)  # itself
+        self.assertEqual(cat22.descendants[0], cat22)  # the last one has to be the root
+        self.assertEqual(cat22.descendants[1], cat221)  # the last one has to be the root
+        self.assertEqual(cat22.ancestors.count(), 2)  # itself, root
+        self.assertEqual(cat22.ancestors[0], cat2)  # the last one has to be the root
+        self.assertEqual(cat22.ancestors[1], cat22)  # the last one has to be the root
+        self.assertEqual(cat22.root, cat2)  # the last one has to be the root

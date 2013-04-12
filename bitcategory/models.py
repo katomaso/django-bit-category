@@ -45,13 +45,13 @@ class HierarchicalModel(models.Model):
     @property
     def ancestors(self):
         '''Returns ``QuerySet`` of ancestors (including itself)'''
-        ids = map(lambda l: self._mask_for(l) & self.id, range(self.level, 0, -1))
+        ids = map(lambda level: self._mask_for(level) & self.id, range(self.level, 0, -1))
         return self.__class__.objects.filter(id__in=ids)
 
     @property
     def descendants(self):
         '''Return ``QuerySet`` of all descendants (including itself)'''
-        return self.__class__.objects.filter(id__gte=self.id, id__lt=self.id+self.min)
+        return self.__class__.objects.filter(id__gte=self.gte, id__lt=self.lt)
 
     @property
     def root(self):
