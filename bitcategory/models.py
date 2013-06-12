@@ -8,6 +8,7 @@ from django.utils.encoding import python_2_unicode_compatible
 class HierarchicalModel(models.Model):
     '''
     Model which keeps tree-like structure using bitwise primary key.
+    The root category reserves first `LEVEL_BIT_WIDTH` (MSB) bits for it's `id`.
 
     :param:`ID_BIT_WIDTH` int how many bits does the ID have (32 or 64)
     :param:`LEVEL_BIT_WIDTH` int how many bits should level have, does not need
@@ -26,10 +27,10 @@ class HierarchicalModel(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
-        if not self.level:
-            self.level = self.parent.level + 1 if self.parent else 1
+        self.level = self.parent.level + 1 if self.parent else 1
         if not self.id:
             self.id = self.get_free_id()
+            kwargs.update(force_insert=True)
         super(HierarchicalModel, self).save(*args, **kwargs)
 
     @property
@@ -54,6 +55,19 @@ class HierarchicalModel(models.Model):
         return self.__class__.objects.filter(id__gte=self.gte, id__lt=self.lt)
 
     @property
+    def neighbours(self):
+        '''Return ``QuerySet`` of all neighbours (including itself)'''
+        return self.__class__.objects.filter(parent=self.parent)
+
+    @property
+    def first_child(self):
+        '''Return ``QuerySet`` of all neighbours (including itself)'''
+        try:
+            return self.__class__.objects.filter(parent=self)[0]
+        except IndexError:
+            return None
+
+    @property
     def root(self):
         '''Returns root node from DB'''
         return self.__class__.objects.get(pk=self.id & self._mask_for(1))
@@ -68,6 +82,22 @@ class HierarchicalModel(models.Model):
         '''Maximal value for given (sub) level'''
         return (2 ** self.__class__.LEVEL_BIT_WIDTH - 1) << self._get_right_offset()
 
+    def __gt__(self, other):
+        '''
+        Function (mostly for template rendering) which states if the other is a
+        child of self. So ROOT1 > CHILD1 == True and ROOT2 > CHILD1 == False
+        '''
+        if not isinstance(other, self.__class__):
+            raise ValueError("Compare only HierarchicalModels ancessors")
+        if self.id is None or other.id is None:
+            raise ValueError("Cannot compare unsaved HierarchicalModel")
+        return (self.id == (other.id & self._mask_for(self.level)))
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        return self.id == other.id
+
     def get_free_id(self):
         '''Returns next free ID in database evaluating spaces made by deleted items'''
         step = self.min
@@ -75,7 +105,7 @@ class HierarchicalModel(models.Model):
             pks = sorted(self.__class__.objects.filter(parent__isnull=True).values_list("id", flat=True))
             minimum = step
         else:
-            minimum = (self.parent.id & self._mask_for(self.parent.level)) + step
+            minimum = self.parent.id + step
             pks = sorted(self.parent.children.values_list("id", flat=True))
         if not pks:
             return minimum
@@ -98,15 +128,17 @@ class HierarchicalModel(models.Model):
 
 
 @python_2_unicode_compatible
-class Category(HierarchicalModel):
-
+class CategoryBase(HierarchicalModel):
+    '''
+    An Category model prepared for you.
+    '''
     name = models.CharField(max_length=255, null=False)
     slug = models.SlugField(max_length=255, blank=True, db_index=False)
     path = models.CharField(max_length=255, blank=True, db_index=True, unique=True,
                             help_text="Generated automatically, don't edit")
 
     class Meta:
-        abstract = False
+        abstract = True
 
     def __str__(self):
         return self.name
@@ -120,4 +152,13 @@ class Category(HierarchicalModel):
             new_path = "/".join((self.parent.path.strip("/"), self.slug))
         if self.path != new_path:
             self.path = new_path
-        super(Category, self).save(*args, **kwargs)
+        super(CategoryBase, self).save(*args, **kwargs)
+
+
+class Category(CategoryBase):
+    '''
+    This class is mostly for testing purposes. If you don't want this class to
+    be created in your database just don't put bitcategory into INSTALLED_APPS.
+    '''
+    class Meta:
+        abstract = False

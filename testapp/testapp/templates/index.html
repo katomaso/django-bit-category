@@ -1,0 +1,23 @@
+<html>
+<head>
+    <title>BitCategory TestApp</title>
+    <script src="http://code.jquery.com/jquery-2.0.2.min.js"></script>
+    {{form.media}}
+</head>
+<body>
+    <form method="post">
+        {% csrf_token %}
+        {% if form.errors %}
+            {{ form.errors }}
+        {% endif %}
+        <div>
+            {{form}}
+        </div><br>
+        <input type="submit" value="send">
+    </form>
+    <br>
+    {% if selected %}
+        <strong>Selected category: </strong> {{selected.name}}<br>
+    {% endif %}
+</body>
+</html>

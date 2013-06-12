@@ -33,6 +33,7 @@ class UnitTests(TestCase):
 class ModelTest(TestCase):
 
     def test_get_free_id(self):
+        Category.objects.all().delete()  # WTF why!?
         # empty db
         cat1 = Category(parent=None, level=1, name="cat1")
         self.assertEqual(cat1.get_free_id(), 0b00001000000000000000000000000000)
@@ -78,3 +79,42 @@ class ModelTest(TestCase):
         self.assertEqual(cat22.ancestors[0], cat2)  # the last one has to be the root
         self.assertEqual(cat22.ancestors[1], cat22)  # the last one has to be the root
         self.assertEqual(cat22.root, cat2)  # the last one has to be the root
+
+    def test_gt(self):
+        hm1 = Category(parent=None, level=1, name="cat1")
+        hm1.save()
+        hm11 = Category(parent=hm1, level=2, name="cat11")
+        hm11.save()
+        hm2 = Category(parent=None, level=1, name="cat2")
+        hm2.save()
+        self.assertTrue(hm1 > hm11)
+        self.assertTrue(hm1 > hm1)  # this might feel akward
+        self.assertFalse(hm1 > hm2)
+        self.assertFalse(hm11 > hm1)
+
+    def test_relations(self):
+        Category.objects.all().delete()  # WTF why!?
+        cat1 = Category.objects.create(parent=None, name="cat1")
+        cat2 = Category.objects.create(parent=None, name="cat2")
+        cat3 = Category.objects.create(parent=None, name="cat3")
+        cat21 = Category.objects.create(parent=cat2, name="cat21")
+        cat22 = Category.objects.create(parent=cat2, name="cat22")
+        cat23 = Category.objects.create(parent=cat2, name="cat23")
+        cat24 = Category.objects.create(parent=cat2, name="cat24")
+        cat31 = Category.objects.create(parent=cat3, name="cat31")
+        cat32 = Category.objects.create(parent=cat3, name="cat32")
+        cat221 = Category.objects.create(parent=cat22, name="cat221")
+        cat222 = Category.objects.create(parent=cat22, name="cat222")
+
+        self.assertEqual(cat1.neighbours.count(), 3)
+
+        self.assertEqual(cat21.neighbours.count(), 4)
+        self.assertEqual(cat22.neighbours.count(), 4)
+        self.assertEqual(cat23.neighbours.count(), 4)
+        self.assertEqual(cat24.neighbours.count(), 4)
+
+        self.assertEqual(cat31.neighbours.count(), 2)
+        self.assertEqual(cat32.neighbours.count(), 2)
+
+        self.assertEqual(cat221.neighbours.count(), 2)
+        self.assertEqual(cat222.neighbours.count(), 2)
