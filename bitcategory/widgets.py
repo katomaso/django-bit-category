@@ -27,7 +27,9 @@ class HierarchicalSelect(Widget):
         '''
         qs = None
         if value:
-            qs = list(value.ancestors.order_by("id")) + [value.first_child, ]
+            qs = list(value.ancestors.order_by("id"))
+            if value.first_child is not None:
+                qs.append(value.first_child)
         else:
             qs = self.model.objects.filter(level=1)[0:1]
 

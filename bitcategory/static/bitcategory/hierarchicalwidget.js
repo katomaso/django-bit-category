@@ -22,7 +22,7 @@ $(document).ready(function(){
         // append first - empty option
         select.append($('<option></option>')
                         .attr("value", null)
-                        .text("---------------")
+                        .text("----------------")
                      );
         $.each(data.items, function(i, item) {
             select.append($('<option></option>')
