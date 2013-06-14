@@ -9,15 +9,9 @@ $(document).ready(function(){
 
     function hierarchical_handle_ajax(data, status, xhr) {
         var caller = $("#" + data.caller);
-        var re = new RegExp(/([a-zA-Z_]+)(\d)/g);  // for id/name change
+        var re = new RegExp(/([a-zA-Z_]+)(\d+)/g);  // for id/name change
         // remove all "deeper" selects
-        var i = data.level;
-        var deeper_id = data.caller.replace(re, "$1" + i);
-        while($("#" + deeper_id).length > 0) {
-            $("#" + deeper_id).remove();
-            i += 1;
-            deeper_id = data.caller.replace(re, "$1" + i);
-        }
+        hierarchical_clean_successors(caller);
         // if there are no new data, quit
         if (data.items.length === 0) return;
         // clone select and exchange it's items
@@ -38,12 +32,40 @@ $(document).ready(function(){
         caller.parent().append(select);
     }
 
+    function hierarchical_bad_request(caller) {
+        return function (data, status, xhr) {
+            hierarchical_clean_successors(caller);
+        };
+    }
+
+    function hierarchical_clean_successors(caller) {
+        var caller_id = caller.attr("id");
+        var re = new RegExp(/([a-zA-Z_]+)(\d+)/g);  // for id/name change
+        var captures = re.exec(caller_id);
+        var level =  parseInt(captures[2], 10) + 1;
+        var deeper_id = caller_id.replace(re, "$1" + level.toString());
+        while($("#" + deeper_id).length > 0) {
+            $("#" + deeper_id).remove();
+            level += 1;
+            deeper_id = caller_id.replace(re, "$1" + level.toString());
+        }
+    }
 
     $(".hierarchical_widget").on("change", function(event) {
         var selected_id = $(this).children("option:selected").val();
+        if (selected_id === null) {
+            hierarchical_clean_successors($(this));
+            return false;
+        }
         var url = $(this).attr("data:url");
-        $.get(url, {"id": selected_id, "caller": $(this).attr("id")},
-              hierarchical_handle_ajax, "json"
-        ).fail(function() {console.log("Hierarchical request did not succeeded");});
+        $.ajax(url, {
+            "type": "GET",
+            "dataType": "json",
+            "data": {"id": selected_id,
+                     "caller": $(this).attr("id")},
+            "success": hierarchical_handle_ajax,
+            "error": hierarchical_bad_request($(this))
+            }
+        );
     });
 });

@@ -2,7 +2,6 @@ from __future__ import division
 
 from django.db import models
 from django.template.defaultfilters import slugify
-from django.utils.encoding import python_2_unicode_compatible
 
 
 class HierarchicalModel(models.Model):
@@ -127,7 +126,6 @@ class HierarchicalModel(models.Model):
         return (2 ** self._get_left_offset(level) - 1) << (self._get_right_offset(level))
 
 
-@python_2_unicode_compatible
 class CategoryBase(HierarchicalModel):
     '''
     An Category model prepared for you.
@@ -146,7 +144,7 @@ class CategoryBase(HierarchicalModel):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
-        # update path every time when changes
+        # update path every time
         new_path = self.slug
         if self.parent:
             new_path = "/".join((self.parent.path.strip("/"), self.slug))

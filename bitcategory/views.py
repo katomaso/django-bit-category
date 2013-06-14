@@ -17,7 +17,7 @@ def ajax(request, model):
                          {caller: id_of_caller (got from GET['caller'],
                           items: [(key, value), (key, value)]
                           level: <int> // item's level
-                          } or Http505
+                          } or HTTP 400
     '''
     if not issubclass(model, HierarchicalModel):
         raise ValueError("Given model has to be a subclass of a HierarchicalModel")

@@ -3,6 +3,7 @@ import copy
 
 from django.utils.encoding import force_text
 from django.forms.widgets import Widget, Select
+from django.template.defaultfilters import mark_safe
 
 
 class HierarchicalSelect(Widget):
@@ -58,7 +59,7 @@ class HierarchicalSelect(Widget):
         if value and isinstance(value, (int)):
             value = self.model.objects.get(id=value)
         attrs.update({"data:url": self.url, "class": "hierarchical_widget"})
-        return self.subrenders(name, value, attrs)
+        return mark_safe(self.subrenders(name, value, attrs))
 
     def value_from_datadict(self, data, files, name):
         '''
