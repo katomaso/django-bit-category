@@ -23,6 +23,6 @@ setup(
     keywords="django category hierarchy",
 
     install_requires=[
-        "django>=1.4",
+        "django>=1.5",
     ],
 )

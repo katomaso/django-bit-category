@@ -9,9 +9,9 @@ class HierarchicalModel(models.Model):
     Model which keeps tree-like structure using bitwise primary key.
     The root category reserves first `LEVEL_BIT_WIDTH` (MSB) bits for it's `id`.
 
-    :param:`ID_BIT_WIDTH` int how many bits does the ID have (32 or 64)
-    :param:`LEVEL_BIT_WIDTH` int how many bits should level have, does not need
-        to be divisor of `ID_BIT_WIDTH`. The level can take 2^LEVEL_BIT_WIDTH items.
+    :param:`ID_BIT_WIDTH` int how many bits the ID has (32 or 64)
+    :param:`LEVEL_BIT_WIDTH` int how many bits should one level have. It does not need
+        to be a divisor of `ID_BIT_WIDTH`. The level can take 2^LEVEL_BIT_WIDTH items.
     :param:`level` int default 1
     '''
     ID_BIT_WIDTH = 32
@@ -87,7 +87,7 @@ class HierarchicalModel(models.Model):
         child of self. So ROOT1 > CHILD1 == True and ROOT2 > CHILD1 == False
         '''
         if not isinstance(other, self.__class__):
-            raise ValueError("Compare only HierarchicalModels ancessors")
+            raise ValueError("Compare only HierarchicalModels ancestors")
         if self.id is None or other.id is None:
             raise ValueError("Cannot compare unsaved HierarchicalModel")
         return (self.id == (other.id & self._mask_for(self.level)))
@@ -128,7 +128,7 @@ class HierarchicalModel(models.Model):
 
 class CategoryBase(HierarchicalModel):
     '''
-    An Category model prepared for you.
+    Category model prepared for you.
     '''
     name = models.CharField(max_length=255, null=False)
     slug = models.SlugField(max_length=255, blank=True, db_index=False)

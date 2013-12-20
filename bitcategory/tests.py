@@ -1,13 +1,15 @@
 from __future__ import absolute_import
 from django.test import TestCase
 
-from .models import Category, HierarchicalModel
+from .models import Category
 
 
 class UnitTests(TestCase):
 
     def test_bit_mask(self):
-        hm = HierarchicalModel(parent=None, level=1)
+        ## can't use HierarchicalModel here because since django 1.6. one cannot
+        ## instantiate abstract model with foreign key ...
+        hm = Category(parent=None, level=1, name="dummy")
         self.assertEqual(hm._mask_for(1), 0b11111000000000000000000000000000)
         self.assertEqual(hm._mask_for(2), 0b11111111110000000000000000000000)
         self.assertEqual(hm._mask_for(3), 0b11111111111111100000000000000000)
@@ -16,7 +18,7 @@ class UnitTests(TestCase):
         self.assertEqual(hm._mask_for(6), 0b11111111111111111111111111111100)
 
     def test_bit_offset(self):
-        hm = HierarchicalModel(parent=None, level=1)
+        hm = Category(parent=None, level=1, name="dummy")
         self.assertEqual(hm._get_left_offset(), 5)
         self.assertEqual(hm._get_left_offset(1), 5)
         self.assertEqual(hm._get_left_offset(2), 10)
@@ -25,7 +27,7 @@ class UnitTests(TestCase):
         self.assertEqual(hm._get_right_offset(2), 22)
 
     def test_min_max(self):
-        hm = HierarchicalModel(parent=None, level=1)
+        hm = Category(parent=None, level=1, name="dummy")
         self.assertEqual(hm.min, 0b00001000000000000000000000000000)
         self.assertEqual(hm.max, 0b11111000000000000000000000000000)
 
