@@ -6,11 +6,7 @@ VERSION = 0.1
 setup(
     name=APP_NAME,
     version=VERSION,
-    description='''Django category app which uses tree-like structure using bitwise primary key.
-    Why's that? Because it is simple and blazingly fast!
-    You can query a model with relation to all sub-nodes with
-    `SomeModel.objects.filter(category_id__gte=category.gte, category_id__lt=category.lt)`
-    ''',
+    description="Django category app which uses tree-like structure using bitwise primary key.",
 
     packages=[
         'bitcategory',
