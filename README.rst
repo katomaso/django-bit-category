@@ -4,7 +4,7 @@
 django-bit-category
 =====================
 
-Very fast abstract ``Model`` with tree-like structure using bitwise ID field.
+Abstract (and one concrete) ``Model`` with tree-like structure using bitwise ID field.
 This implementation is **very simple** and **super fast**!
 
 The key idea is to reserve a block of bits in model's ID for different levels of

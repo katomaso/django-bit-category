@@ -7,8 +7,8 @@ from bitcategory.models import HierarchicalModel
 
 def ajax(request, model):
     '''
-    Should be called via ajax/get request. It expects two parameters in a GET
-    request: `id` the ID of a calling model and `caller` - an HTML ID of
+    Should be called via ajax/get request. It expects two parameters in GET
+    request: `id` the ID of a calling model and `caller` - an (HTML) ad attribute of
     the calling widget.
 
     :param: `model` has to be set in your urls.py with default argument - used model as

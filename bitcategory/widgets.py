@@ -13,7 +13,7 @@ class HierarchicalSelect(Widget):
 
     def __init__(self, attrs=None):
         '''
-        :param: `url` an url to send the ajax request to
+        :param: `url` url where to send the ajax request
         '''
         super(HierarchicalSelect, self).__init__(attrs)
         self.subwidget = Select
