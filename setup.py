@@ -1,7 +1,7 @@
 from setuptools import setup
 
 APP_NAME = "django-bit-category"
-VERSION = 0.1
+VERSION = 0.2
 
 setup(
     name=APP_NAME,
