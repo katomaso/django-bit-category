@@ -11,6 +11,10 @@ setup(
     packages=[
         'bitcategory',
     ],
+    package_data={
+        "": ["static/bitcategory/*"],
+    },
+    include_package_data=True,
 
     author='Tomas Peterka',
     author_email='prestizni@gmail.com',
