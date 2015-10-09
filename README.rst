@@ -44,28 +44,49 @@ What is included in this app
 How to make it work
 -------------------
 
-If you want to use just a abstract model, then you don't need to do anything special.
-Just import a model ``from bitcategory.models import BaseCategory`` and here you are.
+If you just want to use just one of the abstract models then you don't need to do anything special.
+Import the abstract model ``from bitcategory.models import BaseCategory`` and inherit from it in your
+concrete Model. Then make a foreign key in your another model which is going to use categories::
 
-If you would like to have the awesome dynamic select boxes you need to do more
+    # :file: models.py
+    from django.db import models
+    from bitcategory.models import BaseCategory
+
+    class MyCategory(BaseCategory):
+        # BaseCategory already provides fileds name, slug and path
+        class Meta:
+            abstract = False
+
+    class MyProduct(models.Model):
+        # some other fields like price, quantity ....
+        category = models.ForeignKey('myproject.MyCategory', verbose_name=_("Category"))
+
+That is all to your ``Model`` definition. Now, provided you have a concrete instance of MyCategory in
+variable ``category``, you can query products within the category and all its subcategories by::
+
+    MyProduct.objects.filter(category_id__gte=category.gte, category_id__lt=category.lt)
+
+or to get products only for the category by::
+
+    MyProduct.objects.filter(category=category)
+
+However, if you want to have the awesome dynamic select boxes in your forms with ``category`` in it,
+you need to do more
+
   * add the ``bitcategory`` into your INSTALLED_APPS
   * add ``bitcategory.urls`` into your urls and specify your custom hierarchical
-    model. If you didn't make custom model, then you still have to specify   
-    ``bitcategory.models.Category``. The most simple way looks like::
-  
+    model. If you didn't create your custom hierarchical model, then use our pre-built concrete model
+    ``bitcategory.models.Category``. We do that in order to be able to respond to AJAX requests which are sent
+    by the ``bitcategory.fields.HierarchicalField``. The most simple way looks like::
+
       # :file: urls.py
       from django.conf.urls import patterns, include, url
       from myapp.models import YourHierarchicalModel
-      
+
       urlpatterns = patterns('',
             url('', include('bitcategory.urls'), {"model": YourHierarchicalModel}),
       )
 
-And that's done. Just use ``bitcategory.fields.HierarchicalField`` and don't forget
-to include ``{{form.media}}`` into your template for javascripts.
-
-Future:
-  * [DONE] Adding widget which handles the tree structure via many selects
-    created via AJAX
-  * Finish the implementation of namespaceses (even in the Field)
-    for different models  
+Now you are ready to show your form with categories in it. First, add
+``bitcategory.fields.HierarchicalField`` in the form. When rendering the form into a page, don't
+forget to include ``{{form.media}}`` into your template for javascripts.
