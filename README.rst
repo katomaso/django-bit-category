@@ -1,14 +1,23 @@
+django-bit-category
+###################
+
 :author: Tomas Peterka
 :licence: GPL
-
-django-bit-category
-=====================
 
 Abstract (and one concrete) ``Model`` with tree-like structure using bitwise ID field.
 This implementation is **very simple** and **super fast**!
 Given a category, you can query for related models (products) to the category
 and all it's subcategories by
 `SomeModel.objects.filter(category_id__gte=category.gte, category_id__lt=category.lt)`
+
+Get it
+======
+
+Source: https://github.com/katomaso/django-bit-category/
+Pypi: https://pypi.python.org/pypi/django-bit-category/
+
+Technical details
+=================
 
 The key idea is to reserve a block of bits in model's ID for different levels of
 hierarchy. In the basic setup we expect 32 bit ID (can be changed via ``ID_BIT_WIDTH``)
