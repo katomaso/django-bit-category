@@ -11,12 +11,12 @@ The usual way is to put::
         url(r'', include('bitcategory.urls'), {"model": MyCategory})
     )
 
-By using a namespace you can use more hierarchical models. Then you need to 
+By using a namespace you can use more hierarchical models. Then you need to
 pass the namespace into a HierarchicalField associated with the custom model.
 '''
 from django.conf.urls import patterns, url
+from bitcategory.views import ajax
 
-urlpatterns = patterns(
-    'bitcategory.views',
-    url(r'^hierarchical_ajax$', 'ajax', name="hierarchical_ajax"),
-)
+urlpatterns = [
+    url(r'^hierarchical_ajax$', ajax, name="hierarchical_ajax"),
+]

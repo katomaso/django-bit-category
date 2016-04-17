@@ -160,3 +160,4 @@ class Category(CategoryBase):
     '''
     class Meta:
         abstract = False
+        app_label = "bitcategory"
