@@ -1,9 +1,9 @@
 from bitcategory import models
 from django.dispatch import receiver
-from django.db.models.signals import post_syncdb
+from django.db.models.signals import post_migrate
 
 
-@receiver(post_syncdb, sender=models)
+@receiver(post_migrate, sender=models)
 def load_test_categories(sender, **kwargs):
     r1, c = models.Category.objects.get_or_create(name="root1")
     r2, c = models.Category.objects.get_or_create(name="root2")
