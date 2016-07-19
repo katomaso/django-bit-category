@@ -7,8 +7,10 @@ from .models import Category
 class UnitTests(TestCase):
 
     def test_bit_mask(self):
-        ## can't use HierarchicalModel here because since django 1.6. one cannot
-        ## instantiate abstract model with foreign key ...
+        """We can't use HierarchicalModel here.
+
+        Since django 1.6. one can't instantiate an abstract model with foreign key.
+        """
         hm = Category(parent=None, level=1, name="dummy")
         self.assertEqual(hm._mask_for(1), 0b11111000000000000000000000000000)
         self.assertEqual(hm._mask_for(2), 0b11111111110000000000000000000000)
@@ -93,6 +95,31 @@ class ModelTest(TestCase):
         self.assertTrue(hm1 > hm1)  # this might feel akward
         self.assertFalse(hm1 > hm2)
         self.assertFalse(hm11 > hm1)
+
+    def test_contains(self):
+        hm1 = Category(parent=None, level=1, name="cat1")
+        hm1.save()
+        hm11 = Category(parent=hm1, level=2, name="cat11")
+        hm11.save()
+        hm12 = Category(parent=hm1, level=2, name="cat12")
+        hm12.save()
+        hm2 = Category(parent=None, level=1, name="cat2")
+        hm2.save()
+        hm22 = Category(parent=hm2, level=2, name="cat22")
+        hm22.save()
+        hm121 = Category(parent=hm12, level=3, name="cat121")
+        hm121.save()
+        self.assertTrue(hm1 in hm1)
+        self.assertTrue(hm11 in hm1, "{:b} in {:b} when mask {:b}".format(hm11.id, hm1.id, hm1._mask_for(hm1.level)))
+        self.assertTrue(hm12 in hm1)
+        self.assertTrue(hm121 in hm1)
+        self.assertTrue(hm22 in hm2)
+        self.assertTrue(hm2 in hm2)
+        self.assertFalse(hm1 in hm2)
+        self.assertFalse(hm1 in hm11)
+        self.assertFalse(hm1 in hm12)
+        self.assertFalse(hm1 in hm121)
+        self.assertFalse(hm22 in hm1)
 
     def test_relations(self):
         Category.objects.all().delete()  # WTF why!?
