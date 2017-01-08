@@ -166,6 +166,10 @@ class CategoryBase(HierarchicalModel):
             self.path = new_path
         super(CategoryBase, self).save(*args, **kwargs)
 
+    def full_name(self):
+        """Compose name of the names of all ancestors."""
+        return " - ".join(ancestor.name for ancestor in self.ancestors)
+
 
 class Category(CategoryBase):
     """
