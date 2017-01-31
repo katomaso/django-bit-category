@@ -5,7 +5,7 @@ import io
 from setuptools import setup
 
 APP_NAME = "django-bit-category"
-VERSION = "0.5.2"
+VERSION = "0.5.3"
 
 
 def _read(filename):
